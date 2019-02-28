@@ -5,7 +5,7 @@ import torch.utils.data
 from torch.autograd import Variable
 import torch.nn.functional as F
 import math
-from submodule import *
+from .submodule import *
 
 class PSMNet(nn.Module):
     def __init__(self, maxdisp):
@@ -21,20 +21,20 @@ class PSMNet(nn.Module):
 
         self.dres1 = nn.Sequential(convbn_3d(32, 32, 3, 1, 1),
                                    nn.ReLU(inplace=True),
-                                   convbn_3d(32, 32, 3, 1, 1)) 
+                                   convbn_3d(32, 32, 3, 1, 1))
 
         self.dres2 = nn.Sequential(convbn_3d(32, 32, 3, 1, 1),
                                    nn.ReLU(inplace=True),
                                    convbn_3d(32, 32, 3, 1, 1))
- 
+
         self.dres3 = nn.Sequential(convbn_3d(32, 32, 3, 1, 1),
                                    nn.ReLU(inplace=True),
-                                   convbn_3d(32, 32, 3, 1, 1)) 
+                                   convbn_3d(32, 32, 3, 1, 1))
 
         self.dres4 = nn.Sequential(convbn_3d(32, 32, 3, 1, 1),
                                    nn.ReLU(inplace=True),
-                                   convbn_3d(32, 32, 3, 1, 1)) 
- 
+                                   convbn_3d(32, 32, 3, 1, 1))
+
         self.classify = nn.Sequential(convbn_3d(32, 32, 3, 1, 1),
                                       nn.ReLU(inplace=True),
                                       nn.Conv3d(32, 1, kernel_size=3, padding=1, stride=1,bias=False))
@@ -61,7 +61,7 @@ class PSMNet(nn.Module):
 
         refimg_fea     = self.feature_extraction(left)
         targetimg_fea  = self.feature_extraction(right)
- 
+
         #matching
         cost = Variable(torch.FloatTensor(refimg_fea.size()[0], refimg_fea.size()[1]*2, self.maxdisp/4,  refimg_fea.size()[2],  refimg_fea.size()[3]).zero_(), volatile= not self.training).cuda()
 
@@ -76,8 +76,8 @@ class PSMNet(nn.Module):
 
         cost0 = self.dres0(cost)
         cost0 = self.dres1(cost0) + cost0
-        cost0 = self.dres2(cost0) + cost0 
-        cost0 = self.dres3(cost0) + cost0 
+        cost0 = self.dres2(cost0) + cost0
+        cost0 = self.dres3(cost0) + cost0
         cost0 = self.dres4(cost0) + cost0
 
         cost = self.classify(cost0)
